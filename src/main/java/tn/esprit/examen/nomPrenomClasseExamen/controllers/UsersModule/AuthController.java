@@ -1,6 +1,7 @@
 package tn.esprit.examen.nomPrenomClasseExamen.controllers.UsersModule;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import tn.esprit.examen.nomPrenomClasseExamen.entities.AuthResponse;
 import tn.esprit.examen.nomPrenomClasseExamen.entities.User;
 import tn.esprit.examen.nomPrenomClasseExamen.repositories.UsersModule.IUserRepository;
 import tn.esprit.examen.nomPrenomClasseExamen.services.UsersModule.AuthService;
+import tn.esprit.examen.nomPrenomClasseExamen.services.UsersModule.ProducerService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +24,9 @@ public class AuthController {
     private final AuthService authService;
     private final JwtUtil jwtUtil;
     private final IUserRepository userRepository;
+    @Autowired
+    private ProducerService producerService;
+
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody User user) {
@@ -33,6 +38,8 @@ public class AuthController {
         }
 
         User savedUser = authService.register(user);
+        producerService.sendMessage("User créé : " + user.getEmail());
+
         String token = jwtUtil.generateToken(savedUser);
         return ResponseEntity.ok(new AuthResponse(token));
     }
